@@ -14,10 +14,10 @@ Durante el proceso de configuración inicial, se detectaron y corrigieron proble
 
 ---
 
-##  Resumen de Impacto
+## Resumen de Impacto
 Gracias a estas modificaciones, el proyecto ahora es **completamente reproducible** en máquinas con Windows 10/11 y hardware diverso (AMD/Intel/NVIDIA), superando las barreras de compatibilidad del repositorio oficial.
 
-##  Archivos Modificados y Justificación Técnica
+## Archivos Modificados y Justificación Técnica
 
 Para lograr la estabilidad del sistema en entornos Windows con GPUs no-NVIDIA, se intervinieron los siguientes módulos centrales:
 
@@ -40,7 +40,7 @@ Para lograr la estabilidad del sistema en entornos Windows con GPUs no-NVIDIA, s
 ### `training.py` (Gestor de Entrenamiento)
 Es el núcleo operativo que coordina el aprendizaje. Implementa la clase **TrainManager** para manejar la continuidad mediante checkpoints (.ckpt) y el bucle principal `train_and_validate`. Utiliza **DTW (Dynamic Time Warping)** para evaluar la alineación de poses, superando las limitaciones del MSE en secuencias temporales.
 
-### `Model.py` (Arquitectura Principal)
+### `model.py` (Arquitectura Principal)
 Define la estructura que traduce glosas a poses 3D. 
 * **Flujo:** Fuente (Gloss) → Embeddings → Encoder Transformer → Módulo ACD (Difusión) → Poses 3D.
 * Procesa la pérdida enfocándose en las dimensiones de pose, ignorando los contadores de frames para una mayor precisión biomecánica.
@@ -51,7 +51,7 @@ Implementa el módulo **Autoencoder with Conditional Diffusion**.
 * **Inferencia:** Utiliza muestreo **DDIM** para remover el ruido y generar movimiento fluido condicionado por la glosa.
 * Prioriza el dispositivo DirectML para aprovechar la aceleración por hardware en GPUs no-NVIDIA.
 
-##  Configuración del Entorno
+## Configuración del Entorno
 
 ### Requisitos Técnicos
 * **Python:** 3.11 (Requerido para compatibilidad con `torch-directml`).
@@ -72,10 +72,9 @@ pip install -r requirements.txt
 ### Preparación de Datos
 El proyecto utiliza la estructura de datos del modelo [Progressive Transformer](https://github.com/BenSaunders27/ProgressiveTransformersSLP.git)
 
-```bash
-Extraer los datos en la ruta: ./Data/P2014T_Ben/
-```
-Asegurar que los archivos de vocabulario y metadatos (.csv) estén en: ./Configs/
+Extraer los datos en `./Data/tmp/`, con los archivos `train`, `dev` y `test` en sus variantes `.files`, `.gloss`, `.skels` y `.text`, tal como indica `Configs/Sign-IDD.yaml`.
+
+Los archivos de vocabulario y metadatos (`.csv`, `.txt`) ya vienen incluidos en `./Configs/`. Los datos y los modelos entrenados (`./Models/`) no se suben al repositorio por su tamaño.
 
 ### Training
 Para iniciar el proceso de entrenamiento con detección automática de hardware:
@@ -97,3 +96,6 @@ Errores de Precisión: Las GPUs AMD presentaban errores de "NaN" en el cálculo 
 
 Errores de Codificación: Se eliminaron los fallos de lectura de glosas con caracteres especiales en Windows mediante el forzado de UTF-8.
 
+## Créditos y licencia
+
+Este trabajo se basa en el código oficial de [Sign-IDD](https://github.com/NaVi-start/Sign-IDD) (Jiayi He et al.), distribuido bajo licencia MIT. Se conserva su aviso de copyright en [`LICENSE.md`](LICENSE.md). Mi aporte es la adaptación para ejecutar y entrenar en Windows con GPU AMD/Intel mediante DirectML y las correcciones descritas arriba.
